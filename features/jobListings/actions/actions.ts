@@ -37,10 +37,8 @@ export async function createJobListing(
   unsafeData: z.infer<typeof jobListingSchema>
 ) {
   const { orgId } = await getCurrentOrganization();
-  console.log(orgId, "orgId");
 
   const hasPermission = await hasOrgUserPermission("org:job_listings:create");
-  console.log(hasPermission, "hasPermission");
 
   if (orgId == null || !hasPermission) {
     return {
