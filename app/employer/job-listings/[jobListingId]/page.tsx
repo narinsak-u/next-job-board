@@ -16,10 +16,16 @@ import {
   JobListingStatus,
   JobListingTable,
 } from "@/drizzle/schema";
-import {
-  ApplicationTable,
-  SkeletonApplicationTable,
-} from "@/features/jobListingApplications/components/ApplicationTable";
+import { SkeletonApplicationTable } from "@/features/jobListingApplications/components/ApplicationTable";
+import dynamic from "next/dynamic";
+
+const ApplicationTable = dynamic(
+  () =>
+    import(
+      "@/features/jobListingApplications/components/ApplicationTable"
+    ).then((m) => m.ApplicationTable),
+  { loading: () => <SkeletonApplicationTable /> }
+);
 import { getJobListingApplicationJobListingTag } from "@/features/jobListingApplications/db/cache/jobListingApplications";
 import {
   deleteJobListing,
