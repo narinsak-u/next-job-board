@@ -93,8 +93,8 @@ export default function JobListingPage({
 }) {
   return (
     <>
-      <ResizablePanelGroup autoSaveId="job-board-panel" direction="horizontal">
-        <ResizablePanel id="left" order={1} defaultSize={60} minSize={30}>
+      <ResizablePanelGroup orientation="horizontal">
+        <ResizablePanel id="left" defaultSize={60} minSize={30}>
           <div className="p-4 h-screen overflow-y-auto">
             <JobListingItems searchParams={searchParams} params={params} />
           </div>
@@ -119,7 +119,7 @@ export default function JobListingPage({
           }
         >
           <ResizableHandle withHandle className="mx-2" />
-          <ResizablePanel id="right" order={2} defaultSize={40} minSize={30}>
+          <ResizablePanel id="right" defaultSize={40} minSize={30}>
             <div className="p-4 h-screen overflow-y-auto">
               <Suspense fallback={<LoadingSpinner />}>
                 <JobListingDetails

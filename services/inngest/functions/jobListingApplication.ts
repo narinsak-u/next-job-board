@@ -1,5 +1,5 @@
 import { db } from "@/drizzle/db";
-import { inngest } from "../client";
+import { events, inngest } from "../client";
 import { and, eq } from "drizzle-orm";
 import {
   JobListingApplicationTable,
@@ -9,8 +9,11 @@ import {
 import { applicantRankingAgent } from "../ai/applicantRankingAgent";
 
 export const rankApplication = inngest.createFunction(
-  { id: "rank-applicant", name: "Rank Applicant" },
-  { event: "app/jobListingApplication.created" },
+  {
+    id: "rank-applicant",
+    name: "Rank Applicant",
+    triggers: [events["app/jobListingApplication.created"]],
+  },
   async ({ step, event }) => {
     const { userId, jobListingId } = event.data;
 

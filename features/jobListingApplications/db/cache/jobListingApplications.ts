@@ -23,7 +23,7 @@ export function revalidateJobListingApplicationCache(id: {
   userId: string
   jobListingId: string
 }) {
-  revalidateTag(getJobListingApplicationGlobalTag())
-  revalidateTag(getJobListingApplicationJobListingTag(id.jobListingId))
-  revalidateTag(getJobListingApplicationIdTag(id))
+  revalidateTag(getJobListingApplicationGlobalTag(), "max")
+  revalidateTag(getJobListingApplicationJobListingTag(id.jobListingId), "max")
+  revalidateTag(getJobListingApplicationIdTag(id), "max")
 }

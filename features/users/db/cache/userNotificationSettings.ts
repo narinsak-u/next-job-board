@@ -10,6 +10,6 @@ export function getUserNotificationSettingsIdTag(userId: string) {
 }
 
 export function revalidateUserNotificationSettingsCache(userId: string) {
-  revalidateTag(getUserNotificationSettingsGlobalTag());
-  revalidateTag(getUserNotificationSettingsIdTag(userId));
+  revalidateTag(getUserNotificationSettingsGlobalTag(), "max");
+  revalidateTag(getUserNotificationSettingsIdTag(userId), "max");
 }

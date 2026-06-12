@@ -20,7 +20,6 @@ async function SuspendedPage({ searchParams }: Props) {
   return (
     <OrganizationList
       hidePersonal
-      hideSlug
       skipInvitationScreen
       afterSelectOrganizationUrl={redirectUrl}
       afterCreateOrganizationUrl={redirectUrl}

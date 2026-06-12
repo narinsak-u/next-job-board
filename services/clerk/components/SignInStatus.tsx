@@ -1,21 +1,16 @@
-import { ReactNode, Suspense } from "react";
-import {
-  SignedOut as ClerkSignedOut,
-  SignedIn as ClerkSignedIn,
-} from "@clerk/nextjs";
+"use client";
+
+import { useAuth } from "@clerk/nextjs";
+import { ReactNode } from "react";
 
 export function SignedOut({ children }: { children: ReactNode }) {
-  return (
-    <Suspense>
-      <ClerkSignedOut>{children}</ClerkSignedOut>
-    </Suspense>
-  );
+  const { isSignedIn } = useAuth();
+  if (isSignedIn) return null;
+  return <>{children}</>;
 }
 
 export function SignedIn({ children }: { children: ReactNode }) {
-  return (
-    <Suspense>
-      <ClerkSignedIn>{children}</ClerkSignedIn>
-    </Suspense>
-  );
+  const { isSignedIn } = useAuth();
+  if (!isSignedIn) return null;
+  return <>{children}</>;
 }

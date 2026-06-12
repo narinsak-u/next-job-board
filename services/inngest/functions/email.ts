@@ -1,5 +1,5 @@
 import { db } from "@/drizzle/db";
-import { inngest } from "../client";
+import { events, inngest } from "../client";
 import { and, eq, gte } from "drizzle-orm";
 import {
   JobListingApplicationTable,
@@ -8,26 +8,17 @@ import {
   UserNotificationSettingsTable,
 } from "@/drizzle/schema";
 import { subDays } from "date-fns";
-import { GetEvents } from "inngest";
 import { getMatchingJobListings } from "../ai/getMatchingJobListings";
 import { resend } from "@/services/resend/client";
 import DailyJobListingEmail from "@/services/resend/components/DailyJobListingEmail";
 import { env } from "@/data/env/server";
 import DailyApplicationEmail from "@/services/resend/components/DailyApplicationEmail";
 
-// # Prepare Daily User Job Listing Notifications
-// 1. Get all users who have enabled new job email notifications
-// 2. Get all job listings posted in the last 24 hours
-// 3. Send an email to each user with the job listings
-// 4. Update the user's notification settings to disable new job email notifications
-// 5. Send an email to the user with the job applications
 export const prepareDailyUserJobListingNotifications = inngest.createFunction(
   {
     id: "prepare-daily-user-job-listing-notifications",
     name: "Prepare Daily User Job Listing Notifications",
-  },
-  {
-    cron: "TZ=America/Chicago 0 7 * * *",
+    triggers: [{ cron: "TZ=America/Chicago 0 7 * * *" }],
   },
   async ({ step, event }) => {
     const getUsers = step.run("get-users", async () => {
@@ -80,9 +71,9 @@ export const prepareDailyUserJobListingNotifications = inngest.createFunction(
 
     if (jobListings.length === 0 || userNotifications.length === 0) return;
 
-    const events = userNotifications.map((notification) => {
+    const stepEvents = userNotifications.map((notification) => {
       return {
-        name: "app/email.daily-user-job-listings",
+        name: "app/email.daily-user-job-listings" as const,
         user: {
           email: notification.user.email,
           name: notification.user.name,
@@ -96,23 +87,13 @@ export const prepareDailyUserJobListingNotifications = inngest.createFunction(
             };
           }),
         },
-      } as const satisfies GetEvents<
-        typeof inngest
-      >["app/email.daily-user-job-listings"];
+      };
     });
 
-    await step.sendEvent("send-emails", events);
+    await step.sendEvent("send-emails", stepEvents);
   }
 );
 
-// # Send Daily User Job Listing Email
-// 1. Send an email to each user with the job listings
-// 2. Send an email to the user with the job applications
-// 3. Update the user's notification settings to disable new job email notifications
-// 4. Update the organization user settings to disable new application email notifications
-// 5. Send an email to the organization user with the job applications
-// 6. Update the organization user settings to disable new job email notifications
-// 7. Send an email to the user with the job applications
 export const sendDailyUserJobListingEmail = inngest.createFunction(
   {
     id: "send-daily-user-job-listing-email",
@@ -121,11 +102,11 @@ export const sendDailyUserJobListingEmail = inngest.createFunction(
       limit: 10,
       period: "1m",
     },
+    triggers: [events["app/email.daily-user-job-listings"]],
   },
-  { event: "app/email.daily-user-job-listings" },
   async ({ event, step }) => {
     const { jobListings, aiPrompt } = event.data;
-    const user = event.user;
+    const user = (event as unknown as { user: { email: string; name: string } }).user;
 
     if (jobListings.length === 0) return;
 
@@ -156,21 +137,13 @@ export const sendDailyUserJobListingEmail = inngest.createFunction(
   }
 );
 
-// # Prepare Daily Organization User Application Notifications
-// 1. Get all organization user settings who have enabled new application email notifications
-// 2. Get all job applications posted in the last 24 hours
-// 3. Send an email to each organization user with the job applications
-// 4. Update the organization user settings to disable new application email notifications
-// 5. Send an email to the organization user with the job applications
-// 6. Update the organization user settings to disable new job email notifications
-// 7. Send an email to the user with the job applications
 export const prepareDailyOrganizationUserApplicationNotifications =
   inngest.createFunction(
     {
       id: "prepare-daily-organization-user-application-notifications",
       name: "Prepare Daily Organization User Application Notifications",
+      triggers: [{ cron: "TZ=America/Chicago 0 7 * * *" }],
     },
-    { cron: "TZ=America/Chicago 0 7 * * *" },
     async ({ step, event }) => {
       const getUsers = step.run("get-user-settings", async () => {
         return await db.query.OrganizationUserSettingsTable.findMany({
@@ -242,7 +215,7 @@ export const prepareDailyOrganizationUserApplicationNotifications =
         (n) => n.userId
       );
 
-      const events = Object.entries(groupedNotifications)
+      const stepEvents = Object.entries(groupedNotifications)
         .map(([, settings]) => {
           if (settings == null || settings.length === 0) return null;
           const userName = settings[0].user.name;
@@ -251,7 +224,7 @@ export const prepareDailyOrganizationUserApplicationNotifications =
           const filteredApplications = applications
             .filter((a) => {
               return settings.find(
-                (s) =>
+                (s: any) =>
                   s.organizationId === a.jobListing.organization.id &&
                   (s.minimumRating == null ||
                     (a.rating ?? 0) >= s.minimumRating)
@@ -269,53 +242,48 @@ export const prepareDailyOrganizationUserApplicationNotifications =
           if (filteredApplications.length === 0) return null;
 
           return {
-            name: "app/email.daily-organization-user-applications",
+            name: "app/email.daily-organization-user-applications" as const,
             user: {
               name: userName,
               email: userEmail,
             },
             data: { applications: filteredApplications },
-          } as const satisfies GetEvents<
-            typeof inngest
-          >["app/email.daily-organization-user-applications"];
+          };
         })
         .filter((v) => v != null);
 
-      await step.sendEvent("send-emails", events);
+      await step.sendEvent("send-emails", stepEvents);
     }
   );
 
-// # Send Daily Organization User Application Email
-// 1. Send an email to each organization user with the job applications
-// 2. Update the organization user settings to disable new application email notifications
-// 3. Send an email to the organization user with the job applications
-// 4. Update the organization user settings to disable new job email notifications
-// 5. Send an email to the user with the job applications
-export const sendDailyOrganizationUserApplicationEmail = inngest.createFunction(
-  {
-    id: "send-daily-organization-user-application-email",
-    name: "Send Daily Organization User Application Email",
-    throttle: {
-      limit: 1000,
-      period: "1m",
+export const sendDailyOrganizationUserApplicationEmail =
+  inngest.createFunction(
+    {
+      id: "send-daily-organization-user-application-email",
+      name: "Send Daily Organization User Application Email",
+      throttle: {
+        limit: 1000,
+        period: "1m",
+      },
+      triggers: [
+        events["app/email.daily-organization-user-applications"],
+      ],
     },
-  },
-  { event: "app/email.daily-organization-user-applications" },
-  async ({ event, step }) => {
-    const { applications } = event.data;
-    const user = event.user;
-    if (applications.length === 0) return;
+    async ({ event, step }) => {
+      const { applications } = event.data;
+      const user = (event as unknown as { user: { email: string; name: string } }).user;
+      if (applications.length === 0) return;
 
-    await step.run("send-email", async () => {
-      await resend.emails.send({
-        from: "Job Board <onboarding@resend.dev>",
-        to: user.email,
-        subject: "Daily Job Listing Applications",
-        react: DailyApplicationEmail({
-          applications,
-          userName: user.name,
-        }),
+      await step.run("send-email", async () => {
+        await resend.emails.send({
+          from: "Job Board <onboarding@resend.dev>",
+          to: user.email,
+          subject: "Daily Job Listing Applications",
+          react: DailyApplicationEmail({
+            applications,
+            userName: user.name,
+          }),
+        });
       });
-    });
-  }
-);
+    }
+  );

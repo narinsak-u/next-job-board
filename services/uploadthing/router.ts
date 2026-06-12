@@ -46,7 +46,7 @@ export const customFileRouter: FileRouter = {
         await uploadthing.deleteFiles(resumeFileKey);
       }
 
-      await inngest.send({ name: "app/resume.uploaded", user: { id: userId } });
+      await inngest.send({ name: "app/resume.uploaded", data: {}, user: { id: userId } } as any);
 
       return { message: "Resume uploaded successfully" };
     }),

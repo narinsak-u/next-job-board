@@ -1,5 +1,5 @@
 import { db } from "@/drizzle/db";
-import { inngest } from "../client";
+import { events, inngest } from "../client";
 import { eq } from "drizzle-orm";
 import { UserResumeTable } from "@/drizzle/schema";
 import { env } from "@/data/env/server";
@@ -9,12 +9,10 @@ export const createAiSummaryOfUploadedResume = inngest.createFunction(
   {
     id: "create-ai-summary-of-uploaded-resume",
     name: "Create AI Summary of Uploaded Resume",
-  },
-  {
-    event: "app/resume.uploaded",
+    triggers: [events["app/resume.uploaded"]],
   },
   async ({ step, event }) => {
-    const { id: userId } = event.user;
+    const { id: userId } = (event as unknown as { user: { id: string } }).user;
 
     const userResume = await step.run("get-user-resume", async () => {
       return await db.query.UserResumeTable.findFirst({

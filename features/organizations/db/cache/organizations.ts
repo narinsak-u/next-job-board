@@ -10,6 +10,6 @@ export function getOrganizationIdTag(id: string) {
 }
 
 export function revalidateOrganizationCache(id: string) {
-  revalidateTag(getOrganizationGlobalTag());
-  revalidateTag(getOrganizationIdTag(id));
+  revalidateTag(getOrganizationGlobalTag(), "max");
+  revalidateTag(getOrganizationIdTag(id), "max");
 }

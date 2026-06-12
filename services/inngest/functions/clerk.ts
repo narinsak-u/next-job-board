@@ -1,5 +1,5 @@
 import { env } from "@/data/env/server";
-import { inngest } from "../client";
+import { events, inngest } from "../client";
 import { Webhook } from "svix";
 import { NonRetriableError } from "inngest";
 import { deleteUser, insertUser, updateUser } from "@/features/users/db/users";
@@ -24,11 +24,11 @@ function verifyWebhook({
   return new Webhook(env.CLERK_WEBHOOK_SECRET).verify(raw, headers);
 }
 
-// # Event: Create clerk user
 export const clerkCreateUser = inngest.createFunction(
-  { id: "clerk/create-db-user", name: "Clerk - Create DB User" },
   {
-    event: "clerk/user.created",
+    id: "clerk/create-db-user",
+    name: "Clerk - Create DB User",
+    triggers: [events["clerk/user.created"]],
   },
   async ({ event, step }) => {
     await step.run("verify-webhook", async () => {
@@ -40,9 +40,9 @@ export const clerkCreateUser = inngest.createFunction(
     });
 
     const userId = await step.run("create-user", async () => {
-      const userData = event.data.data;
+      const userData = event.data.data as any;
       const email = userData.email_addresses.find(
-        (email) => email.id === userData.primary_email_address_id
+        (email: any) => email.id === userData.primary_email_address_id
       );
 
       if (email == null) {
@@ -67,10 +67,12 @@ export const clerkCreateUser = inngest.createFunction(
   }
 );
 
-// # Event: Update clerk user
 export const clerkUpdateUser = inngest.createFunction(
-  { id: "clerk/update-db-user", name: "Clerk - Update DB User" },
-  { event: "clerk/user.updated" },
+  {
+    id: "clerk/update-db-user",
+    name: "Clerk - Update DB User",
+    triggers: [events["clerk/user.updated"]],
+  },
   async ({ event, step }) => {
     await step.run("verify-webhook", async () => {
       try {
@@ -81,9 +83,9 @@ export const clerkUpdateUser = inngest.createFunction(
     });
 
     await step.run("update-user", async () => {
-      const userData = event.data.data;
+      const userData = event.data.data as any;
       const email = userData.email_addresses.find(
-        (email) => email.id === userData.primary_email_address_id
+        (email: any) => email.id === userData.primary_email_address_id
       );
 
       if (email == null) {
@@ -100,10 +102,12 @@ export const clerkUpdateUser = inngest.createFunction(
   }
 );
 
-// # Event: Delete clerk user
 export const clerkDeleteUser = inngest.createFunction(
-  { id: "clerk/delete-db-user", name: "Clerk - Delete DB User" },
-  { event: "clerk/user.deleted" },
+  {
+    id: "clerk/delete-db-user",
+    name: "Clerk - Delete DB User",
+    triggers: [events["clerk/user.deleted"]],
+  },
   async ({ event, step }) => {
     await step.run("verify-webhook", async () => {
       try {
@@ -114,7 +118,7 @@ export const clerkDeleteUser = inngest.createFunction(
     });
 
     await step.run("delete-user", async () => {
-      const { id } = event.data.data;
+      const { id } = event.data.data as any;
 
       if (id == null) {
         throw new NonRetriableError("No id found");
@@ -124,15 +128,11 @@ export const clerkDeleteUser = inngest.createFunction(
   }
 );
 
-// # ORGANIZATIONS
-// # Create clerk orgenization
 export const clerkCreateOrganization = inngest.createFunction(
   {
     id: "clerk/create-db-organization",
     name: "Clerk - Create DB Organization",
-  },
-  {
-    event: "clerk/organization.created",
+    triggers: [events["clerk/organization.created"]],
   },
   async ({ event, step }) => {
     await step.run("verify-webhook", async () => {
@@ -144,7 +144,7 @@ export const clerkCreateOrganization = inngest.createFunction(
     });
 
     await step.run("create-organization", async () => {
-      const orgData = event.data.data;
+      const orgData = event.data.data as any;
 
       await insertOrganization({
         id: orgData.id,
@@ -157,13 +157,12 @@ export const clerkCreateOrganization = inngest.createFunction(
   }
 );
 
-// # Update clerk organization
 export const clerkUpdateOrganization = inngest.createFunction(
   {
     id: "clerk/update-db-organization",
     name: "Clerk - Update DB Organization",
+    triggers: [events["clerk/organization.updated"]],
   },
-  { event: "clerk/organization.updated" },
   async ({ event, step }) => {
     await step.run("verify-webhook", async () => {
       try {
@@ -174,7 +173,7 @@ export const clerkUpdateOrganization = inngest.createFunction(
     });
 
     await step.run("update-organization", async () => {
-      const orgData = event.data.data;
+      const orgData = event.data.data as any;
 
       await updateOrganization(orgData.id, {
         name: orgData.name,
@@ -185,13 +184,12 @@ export const clerkUpdateOrganization = inngest.createFunction(
   }
 );
 
-// Delete clerk organization
 export const clerkDeleteOrganization = inngest.createFunction(
   {
     id: "clerk/delete-db-organization",
     name: "Clerk - Delete DB Organization",
+    triggers: [events["clerk/organization.deleted"]],
   },
-  { event: "clerk/organization.deleted" },
   async ({ event, step }) => {
     await step.run("verify-webhook", async () => {
       try {
@@ -202,7 +200,7 @@ export const clerkDeleteOrganization = inngest.createFunction(
     });
 
     await step.run("delete-organization", async () => {
-      const { id } = event.data.data;
+      const { id } = event.data.data as any;
 
       if (id == null) {
         throw new NonRetriableError("No id found");
@@ -212,14 +210,11 @@ export const clerkDeleteOrganization = inngest.createFunction(
   }
 );
 
-// Create membership
 export const clerkCreateOrgMembership = inngest.createFunction(
   {
     id: "clerk/create-organization-user-settings",
     name: "Clerk - Create Organization User Settings",
-  },
-  {
-    event: "clerk/organizationMembership.created",
+    triggers: [events["clerk/organizationMembership.created"]],
   },
   async ({ event, step }) => {
     await step.run("verify-webhook", async () => {
@@ -231,8 +226,9 @@ export const clerkCreateOrgMembership = inngest.createFunction(
     });
 
     await step.run("create-organization-user-settings", async () => {
-      const userId = event.data.data.public_user_data.user_id;
-      const orgId = event.data.data.organization.id;
+      const data = event.data.data as any;
+      const userId = data.public_user_data.user_id;
+      const orgId = data.organization.id;
 
       await insertOrganizationUserSettings({
         userId,
@@ -242,14 +238,11 @@ export const clerkCreateOrgMembership = inngest.createFunction(
   }
 );
 
-// Delete membership
 export const clerkDeleteOrgMembership = inngest.createFunction(
   {
     id: "clerk/delete-organization-user-settings",
     name: "Clerk - Delete Organization User Settings",
-  },
-  {
-    event: "clerk/organizationMembership.deleted",
+    triggers: [events["clerk/organizationMembership.deleted"]],
   },
   async ({ event, step }) => {
     await step.run("verify-webhook", async () => {
@@ -261,8 +254,9 @@ export const clerkDeleteOrgMembership = inngest.createFunction(
     });
 
     await step.run("delete-organization-user-settings", async () => {
-      const userId = event.data.data.public_user_data.user_id;
-      const orgId = event.data.data.organization.id;
+      const data = event.data.data as any;
+      const userId = data.public_user_data.user_id;
+      const orgId = data.organization.id;
 
       await deleteOrganizationUserSettings({
         userId,
