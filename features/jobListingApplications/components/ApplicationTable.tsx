@@ -11,7 +11,7 @@ import {
   UserTable,
 } from "@/drizzle/schema";
 import { ColumnDef, Table } from "@tanstack/react-table";
-import { ReactNode, useOptimistic, useState, useTransition } from "react";
+import { memo, ReactNode, useOptimistic, useState, useTransition } from "react";
 import { sortApplicationsByStage } from "../lib/utils";
 import { StageIcon } from "./StageIcon";
 import { formatJobListingApplicationStage } from "../lib/formatters";
@@ -242,7 +242,7 @@ function Toolbar<T>({
   );
 }
 
-function StageCell({
+const StageCell = memo(function StageCell({
   stage,
   jobListingId,
   userId,
@@ -300,9 +300,9 @@ function StageCell({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+});
 
-function RatingCell({
+const RatingCell = memo(function RatingCell({
   rating,
   jobListingId,
   userId,
@@ -358,9 +358,9 @@ function RatingCell({
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+});
 
-function ActionCell({
+const ActionCell = memo(function ActionCell({
   resumeUrl,
   userName,
   resumeMarkdown,
@@ -449,7 +449,7 @@ function ActionCell({
       )}
     </>
   );
-}
+});
 
 function StageDetails({ stage }: { stage: ApplicationStage }) {
   return (
