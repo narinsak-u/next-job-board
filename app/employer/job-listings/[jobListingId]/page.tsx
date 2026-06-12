@@ -52,10 +52,29 @@ import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReactNode, Suspense } from "react";
+import type { Metadata } from "next";
 
 type Props = {
   params: Promise<{ jobListingId: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ jobListingId: string }>;
+}): Promise<Metadata> {
+  const { orgId } = await getCurrentOrganization();
+  const { jobListingId } = await params;
+
+  if (orgId == null) return { title: "Employer Dashboard" };
+
+  const jobListing = await getJobListing(jobListingId, orgId);
+  if (jobListing == null) return { title: "Job Listing Not Found" };
+
+  return {
+    title: `${jobListing.title} — Employer`,
+  };
+}
 
 export default function JobListingPage(props: Props) {
   return (
