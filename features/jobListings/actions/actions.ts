@@ -47,13 +47,6 @@ export async function createJobListing(
     };
   }
 
-  if (orgId == null) {
-    return {
-      error: true,
-      message: "You don't have permission to create a job listing",
-    };
-  }
-
   const { success, data } = jobListingSchema.safeParse(unsafeData);
   if (!success) {
     return {
