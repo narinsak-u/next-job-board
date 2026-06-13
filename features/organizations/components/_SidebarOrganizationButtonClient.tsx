@@ -10,8 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
-import { SignOutButton } from "@/services/clerk/components/AuthButtons";
-import { useClerk } from "@clerk/nextjs";
+import { authClient } from "@/services/better-auth/lib/client";
 import {
   ArrowLeftRightIcon,
   Building2Icon,
@@ -21,6 +20,7 @@ import {
   UserRoundCogIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type User = {
   email: string;
@@ -28,7 +28,7 @@ type User = {
 
 type Organization = {
   name: string;
-  imageUrl: string | null;
+  logo: string | null;
 };
 
 export function SidebarOrganizationButtonClient({
@@ -39,7 +39,12 @@ export function SidebarOrganizationButtonClient({
   organization: Organization;
 }) {
   const { isMobile, setOpenMobile } = useSidebar();
-  const { openOrganizationProfile } = useClerk();
+  const router = useRouter();
+
+  async function handleSignOut() {
+    await authClient.signOut()
+    router.push("/")
+  }
 
   return (
     <DropdownMenu>
@@ -62,13 +67,10 @@ export function SidebarOrganizationButtonClient({
           <OrganizationInfo user={user} organization={organization} />
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => {
-            openOrganizationProfile();
-            setOpenMobile(false);
-          }}
-        >
-          <Building2Icon className="mr-1" /> Manage Organization
+        <DropdownMenuItem asChild>
+          <Link href="/org-settings">
+            <Building2Icon className="mr-1" /> Manage Organization
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/employer/user-settings">
@@ -82,16 +84,14 @@ export function SidebarOrganizationButtonClient({
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/organizations/select">
+          <Link href="/org-select">
             <ArrowLeftRightIcon className="mr-1" /> Switch Organizations
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <SignOutButton>
-          <DropdownMenuItem>
-            <LogOutIcon className="mr-1" /> Log Out
-          </DropdownMenuItem>
-        </SignOutButton>
+        <DropdownMenuItem onClick={handleSignOut}>
+          <LogOutIcon className="mr-1" /> Log Out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -114,7 +114,7 @@ function OrganizationInfo({
     <div className="flex items-center gap-2 overflow-hidden">
       <Avatar className="rounded-lg size-8">
         <AvatarImage
-          src={organization.imageUrl ?? undefined}
+          src={organization.logo ?? undefined}
           alt={organization.name}
         />
         <AvatarFallback className="uppercase bg-primary text-primary-foreground">

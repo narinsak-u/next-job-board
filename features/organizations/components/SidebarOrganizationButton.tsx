@@ -2,11 +2,11 @@ import { Suspense } from "react";
 import {
   getCurrentOrganization,
   getCurrentUser,
-} from "@/services/clerk/lib/getCurrentAuth";
-import { SignOutButton } from "@/services/clerk/components/AuthButtons";
+} from "@/services/better-auth/lib/getCurrentAuth";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { LogOutIcon } from "lucide-react";
 import { SidebarOrganizationButtonClient } from "./_SidebarOrganizationButtonClient";
+import Link from "next/link";
 
 export function SidebarOrganizationButton() {
   return (
@@ -22,20 +22,21 @@ async function SidebarOrganizationSuspense() {
     getCurrentOrganization({ allData: true }),
   ]);
 
-  // console.log({ user, organization });
-
   if (user == null || organization == null) {
     return (
-      <SignOutButton>
-        <SidebarMenuButton>
+      <SidebarMenuButton asChild>
+        <Link href="/org-select">
           <LogOutIcon />
-          <span>Log Out</span>
-        </SidebarMenuButton>
-      </SignOutButton>
+          <span>Select Org</span>
+        </Link>
+      </SidebarMenuButton>
     );
   }
 
   return (
-    <SidebarOrganizationButtonClient user={user} organization={organization} />
+    <SidebarOrganizationButtonClient
+      user={{ email: user.email }}
+      organization={{ name: organization.name, logo: organization.logo ?? null }}
+    />
   );
 }

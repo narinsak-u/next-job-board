@@ -7,9 +7,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "../ui/sidebar";
-import { SignedIn, SignedOut } from "@/services/clerk/components/SignInStatus";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { authClient } from "@/services/better-auth/lib/client";
 
 export function SidebarNavMenuGroup({
   items,
@@ -24,6 +24,8 @@ export function SidebarNavMenuGroup({
   className?: string;
 }) {
   const pathname = usePathname();
+  const { data: session } = authClient.useSession();
+  const isSignedIn = !!session;
 
   return (
     <SidebarGroup className={className}>
@@ -40,12 +42,12 @@ export function SidebarNavMenuGroup({
             </SidebarMenuItem>
           );
 
-          if (item.authStatus === "signedOut") {
-            return <SignedOut key={item.href}>{html}</SignedOut>;
+          if (item.authStatus === "signedOut" && isSignedIn) {
+            return null;
           }
 
-          if (item.authStatus === "signedIn") {
-            return <SignedIn key={item.href}>{html}</SignedIn>;
+          if (item.authStatus === "signedIn" && !isSignedIn) {
+            return null;
           }
 
           return html;
