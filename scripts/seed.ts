@@ -2,7 +2,11 @@ import { db } from "@/drizzle/db";
 import { JobListingTable } from "@/drizzle/schema";
 import { subDays } from "date-fns";
 
-const ORG_ID = "org_2zMDAXCEItxw4fhgExo5R7cUqCh";
+// check if ORG_ID is set
+const ORG_ID = process.env.ORGANIZATION_ID as string;
+if (!ORG_ID) {
+  throw new Error("ORGANIZATION_ID is not set");
+}
 
 const jobListings = [
   {
