@@ -106,10 +106,10 @@ function JobListingListItem({
     | "locationRequirement"
     | "isFeatured"
   >;
-  organization: Pick<
-    typeof OrganizationTable.$inferSelect,
-    "name" | "imageUrl"
-  >;
+  organization: {
+    name: string
+    logo: string | null
+  };
 }) {
   const nameInitials = organization?.name
     .split(" ")
@@ -128,7 +128,7 @@ function JobListingListItem({
         <div className="flex gap-4">
           <Avatar className="size-14 @max-sm:hidden">
             <AvatarImage
-              src={organization.imageUrl ?? undefined}
+              src={organization.logo ?? undefined}
               alt={organization.name}
             />
             <AvatarFallback className="uppercase bg-primary text-primary-foreground">
@@ -244,7 +244,7 @@ async function getJobListings(
         columns: {
           id: true,
           name: true,
-          imageUrl: true,
+          logo: true,
         },
       },
     },

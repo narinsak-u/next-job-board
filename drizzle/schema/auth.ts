@@ -191,12 +191,17 @@ export const invitation = pgTable(
   ],
 );
 
-export const authUserRelations = relations(user, ({ many }) => ({
+import { UserResumeTable } from "./userResume"
+import { UserNotificationSettingsTable } from "./userNotificationSettings"
+
+export const authUserRelations = relations(user, ({ many, one }) => ({
   sessions: many(session),
   accounts: many(account),
   teamMembers: many(teamMember),
   members: many(member),
   invitations: many(invitation),
+  resume: one(UserResumeTable),
+  notificationSettings: one(UserNotificationSettingsTable),
 }));
 
 export const authSessionRelations = relations(session, ({ one }) => ({

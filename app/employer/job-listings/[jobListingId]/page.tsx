@@ -365,7 +365,7 @@ async function getJobListingApplications(jobListingId: string) {
         columns: {
           id: true,
           name: true,
-          imageUrl: true,
+          image: true,
         },
         with: {
           resume: {

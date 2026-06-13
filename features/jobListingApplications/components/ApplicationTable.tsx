@@ -8,7 +8,6 @@ import {
   applicationStages,
   JobListingApplicationTable,
   UserResumeTable,
-  UserTable,
 } from "@/drizzle/schema";
 import { ColumnDef, Table } from "@tanstack/react-table";
 import { memo, ReactNode, useOptimistic, useState, useTransition } from "react";
@@ -48,7 +47,7 @@ type Application = Pick<
   "createdAt" | "stage" | "rating" | "jobListingId"
 > & {
   coverLetterMarkdown: ReactNode | null;
-  user: Pick<typeof UserTable.$inferSelect, "id" | "name" | "imageUrl"> & {
+  user: { id: string; name: string; image: string | null } & {
     resume:
       | (Pick<typeof UserResumeTable.$inferSelect, "resumeFileUrl"> & {
           markdownSummary: ReactNode | null;
@@ -77,7 +76,7 @@ function getColumns(
         return (
           <div className="flex items-center gap-2">
             <Avatar className="rounded-full size-6">
-              <AvatarImage src={user.imageUrl ?? undefined} alt={user.name} />
+              <AvatarImage src={user.image ?? undefined} alt={user.name} />
               <AvatarFallback className="uppercase bg-primary text-primary-foreground text-xs">
                 {nameInitials}
               </AvatarFallback>

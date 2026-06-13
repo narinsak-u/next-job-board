@@ -7,3 +7,4 @@ export * from "./schema/jobListingApplication";
 export * from "./schema/organizationUserSettings";
 export * from "./schema/organizationPlanFeatures";
 export * from "./schema/auth";
+export * from "./schema/authAdditionalRelations";
