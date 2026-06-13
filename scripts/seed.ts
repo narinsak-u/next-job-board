@@ -2,10 +2,11 @@ import { db } from "@/drizzle/db";
 import { JobListingTable } from "@/drizzle/schema";
 import { subDays } from "date-fns";
 
-// check if ORG_ID is set
-const ORG_ID = process.env.ORGANIZATION_ID as string;
+// Set SEED_ORG_ID to a Better Auth organization ID before running
+// Create an org via the UI at /org-select first, then use its ID
+const ORG_ID = process.env.SEED_ORG_ID as string;
 if (!ORG_ID) {
-  throw new Error("ORGANIZATION_ID is not set");
+  throw new Error("SEED_ORG_ID is not set. Create an organization at /org-select and copy its ID.");
 }
 
 const jobListings = [
