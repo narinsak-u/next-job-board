@@ -52,9 +52,7 @@ export default function OrgSelectPage() {
       return
     }
 
-    if (result.data) {
-      await selectOrg(result.data.id)
-    }
+    router.push("/employer")
   }
 
   return (

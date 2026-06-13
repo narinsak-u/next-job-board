@@ -1,4 +1,4 @@
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Card,
   CardContent,
@@ -16,7 +16,7 @@ import {
 } from "@/drizzle/schema";
 import { convertSearchParamsToString } from "@/lib/convertSearchParamsToString";
 import { cn } from "@/lib/utils";
-import { AvatarFallback } from "@radix-ui/react-avatar";
+
 import { and, desc, eq, ilike, or, SQL } from "drizzle-orm";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -76,7 +76,7 @@ async function SuspendedComponent({ searchParams, params }: Props) {
           className="block"
           key={jobListing.id}
           href={`/job-listings/${jobListing.id}?${convertSearchParamsToString(
-            search
+            search,
           )}`}
         >
           <JobListingListItem
@@ -107,8 +107,8 @@ function JobListingListItem({
     | "isFeatured"
   >;
   organization: {
-    name: string
-    logo: string | null
+    name: string;
+    logo: string | null;
   };
 }) {
   const nameInitials = organization?.name
@@ -121,12 +121,12 @@ function JobListingListItem({
     <Card
       className={cn(
         "@container",
-        jobListing.isFeatured && "border-featured bg-featured/20"
+        jobListing.isFeatured && "border-featured bg-featured/20",
       )}
     >
       <CardHeader>
         <div className="flex gap-4">
-          <Avatar className="size-14 @max-sm:hidden">
+          <Avatar className="w-14 h-14 @max-sm:hidden">
             <AvatarImage
               src={organization.logo ?? undefined}
               alt={organization.name}
@@ -184,7 +184,7 @@ async function DaysSincePosting({ postedAt }: { postedAt: Date }) {
 // # Get job listings
 async function getJobListings(
   searchParams: z.infer<typeof searchParamsSchema>,
-  jobListingId: string | undefined
+  jobListingId: string | undefined,
 ) {
   "use cache";
   cacheTag(getJobListingGlobalTag());
@@ -193,13 +193,13 @@ async function getJobListings(
 
   if (searchParams.title) {
     whereConditions.push(
-      ilike(JobListingTable.title, `%${searchParams.title}%`)
+      ilike(JobListingTable.title, `%${searchParams.title}%`),
     );
   }
 
   if (searchParams.locationRequirement) {
     whereConditions.push(
-      eq(JobListingTable.locationRequirement, searchParams.locationRequirement)
+      eq(JobListingTable.locationRequirement, searchParams.locationRequirement),
     );
   }
 
@@ -209,13 +209,13 @@ async function getJobListings(
 
   if (searchParams.state) {
     whereConditions.push(
-      eq(JobListingTable.stateAbbreviation, searchParams.state)
+      eq(JobListingTable.stateAbbreviation, searchParams.state),
     );
   }
 
   if (searchParams.experience) {
     whereConditions.push(
-      eq(JobListingTable.experienceLevel, searchParams.experience)
+      eq(JobListingTable.experienceLevel, searchParams.experience),
     );
   }
 
@@ -225,7 +225,7 @@ async function getJobListings(
 
   if (searchParams.jobIds) {
     whereConditions.push(
-      or(...searchParams.jobIds.map((jobId) => eq(JobListingTable.id, jobId)))
+      or(...searchParams.jobIds.map((jobId) => eq(JobListingTable.id, jobId))),
     );
   }
 
@@ -234,10 +234,10 @@ async function getJobListings(
       jobListingId
         ? and(
             eq(JobListingTable.status, "published"),
-            eq(JobListingTable.id, jobListingId)
+            eq(JobListingTable.id, jobListingId),
           )
         : undefined,
-      and(eq(JobListingTable.status, "published"), ...whereConditions)
+      and(eq(JobListingTable.status, "published"), ...whereConditions),
     ),
     with: {
       organization: {

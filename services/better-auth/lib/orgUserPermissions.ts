@@ -15,10 +15,15 @@ export async function hasOrgUserPermission(permission: UserPermission) {
 
   if (!session?.session.activeOrganizationId) return false
 
+  const [resource, action] = permission.split(":")
+
   const response = await auth.api.hasPermission({
     headers: h,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    body: { permission: permission } as any,
+    body: {
+      permissions: {
+        [resource]: [action],
+      },
+    },
   })
 
   const data = response as { hasPermission?: boolean } | null

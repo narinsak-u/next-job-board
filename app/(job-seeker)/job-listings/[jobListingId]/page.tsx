@@ -155,7 +155,7 @@ async function JobListingDetails({
     <div className="space-y-6 @container">
       <div className="space-y-4">
         <div className="flex gap-4 items-start">
-          <Avatar className="size-14 @max-md:hidden">
+          <Avatar className="w-14 h-14 @max-md:hidden">
             <AvatarImage
               src={jobListing.organization.logo ?? undefined}
               alt={jobListing.organization.name}
