@@ -5,4 +5,5 @@ export * from "./schema/userResume";
 export * from "./schema/userNotificationSettings";
 export * from "./schema/jobListingApplication";
 export * from "./schema/organizationUserSettings";
+export * from "./schema/organizationPlanFeatures";
 export * from "./schema/auth";

@@ -19,7 +19,7 @@ export const UserNotificationSettingsTable = pgTable(
 export const userNotificationSettingsRelations = relations(
   UserNotificationSettingsTable,
   ({ one }) => ({
-    userRef: one(user, {
+    user: one(user, {
       fields: [UserNotificationSettingsTable.userId],
       references: [user.id],
     }),

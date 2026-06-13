@@ -51,7 +51,7 @@ export const jobListingApplicationRelations = relations(
       fields: [JobListingApplicationTable.jobListingId],
       references: [JobListingTable.id],
     }),
-    userRef: one(user, {
+    user: one(user, {
       fields: [JobListingApplicationTable.userId],
       references: [user.id],
     }),

@@ -29,11 +29,11 @@ export const OrganizationUserSettingsTable = pgTable(
 export const organizationUserSettingsRelations = relations(
   OrganizationUserSettingsTable,
   ({ one }) => ({
-    userRef: one(user, {
+    user: one(user, {
       fields: [OrganizationUserSettingsTable.userId],
       references: [user.id],
     }),
-    orgRef: one(organization, {
+    organization: one(organization, {
       fields: [OrganizationUserSettingsTable.organizationId],
       references: [organization.id],
     }),
