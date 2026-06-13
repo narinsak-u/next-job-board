@@ -1,13 +1,14 @@
 import { db } from "@/drizzle/db";
 import { JobListingTable } from "@/drizzle/schema";
+import { user, organization, member } from "@/drizzle/schema/auth";
+import { OrganizationPlanFeaturesTable } from "@/drizzle/schema";
 import { subDays } from "date-fns";
 
-// Set SEED_ORG_ID to a Better Auth organization ID before running
-// Create an org via the UI at /org-select first, then use its ID
-const ORG_ID = process.env.SEED_ORG_ID as string;
-if (!ORG_ID) {
-  throw new Error("SEED_ORG_ID is not set. Create an organization at /org-select and copy its ID.");
-}
+const SEED_USER_ID = process.env.SEED_USER_ID ?? "seed-user-001";
+const SEED_USER_NAME = process.env.SEED_USER_NAME ?? "Seed Admin";
+const SEED_USER_EMAIL = process.env.SEED_USER_EMAIL ?? "seed@example.com";
+const SEED_ORG_ID = process.env.SEED_ORG_ID ?? "seed-org-001";
+const SEED_ORG_NAME = process.env.SEED_ORG_NAME ?? "Seed Company";
 
 const jobListings = [
   {
@@ -223,14 +224,63 @@ const jobListings = [
 ] as const;
 
 async function seed() {
-  console.log(`Seeding ${jobListings.length} job listings...`);
+  console.log("Creating seed user...");
+  await db
+    .insert(user)
+    .values({
+      id: SEED_USER_ID,
+      name: SEED_USER_NAME,
+      email: SEED_USER_EMAIL,
+      emailVerified: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .onConflictDoNothing();
+  console.log(`  ✓ User: ${SEED_USER_NAME} <${SEED_USER_EMAIL}>`);
 
+  console.log("Creating seed organization...");
+  await db
+    .insert(organization)
+    .values({
+      id: SEED_ORG_ID,
+      name: SEED_ORG_NAME,
+      slug: "seed-company",
+      createdAt: new Date(),
+    })
+    .onConflictDoNothing();
+  console.log(`  ✓ Org: ${SEED_ORG_NAME}`);
+
+  console.log("Linking user as organization owner...");
+  await db
+    .insert(member)
+    .values({
+      organizationId: SEED_ORG_ID,
+      userId: SEED_USER_ID,
+      role: "owner",
+      createdAt: new Date(),
+      id: `member-${SEED_ORG_ID}-${SEED_USER_ID}`,
+    })
+    .onConflictDoNothing();
+  console.log("  ✓ Owner role assigned");
+
+  console.log("Creating plan features...");
+  await db
+    .insert(OrganizationPlanFeaturesTable)
+    .values({
+      organizationId: SEED_ORG_ID,
+      maxPublishedJobListings: 15,
+      maxFeaturedJobListings: 5,
+    })
+    .onConflictDoNothing();
+  console.log("  ✓ Plan features set (15 listings, 5 featured)");
+
+  console.log(`Seeding ${jobListings.length} job listings...`);
   for (const listing of jobListings) {
     const result = await db
       .insert(JobListingTable)
       .values({
         ...listing,
-        organizationId: ORG_ID,
+        organizationId: SEED_ORG_ID,
         status: "published",
       })
       .returning({ id: JobListingTable.id, title: JobListingTable.title });
@@ -238,7 +288,10 @@ async function seed() {
     console.log(`  ✓ ${result[0].title}`);
   }
 
-  console.log("Done!");
+  console.log("\nSeed complete!");
+  console.log(`  User ID: ${SEED_USER_ID}`);
+  console.log(`  Org ID:  ${SEED_ORG_ID}`);
+  console.log(`  Sign in with: ${SEED_USER_EMAIL} (via Better Auth — register this email to use)`);
   process.exit(0);
 }
 
