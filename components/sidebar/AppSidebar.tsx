@@ -10,9 +10,9 @@ import {
 } from "@/components/ui/sidebar";
 import { AppSidebarClient } from "./_AppSidebarClient";
 import { ReactNode } from "react";
-import { SignedIn } from "@/services/clerk/components/SignInStatus";
+import { auth } from "@clerk/nextjs/server";
 
-export function AppSidebar({
+export async function AppSidebar({
   children,
   content,
   footerButton,
@@ -21,6 +21,8 @@ export function AppSidebar({
   content: ReactNode;
   footerButton: ReactNode;
 }) {
+  const { userId } = await auth();
+
   return (
     <SidebarProvider className="overflow-y-hidden">
       <AppSidebarClient>
@@ -30,13 +32,13 @@ export function AppSidebar({
             <span className="text-xl text-nowrap">My Job</span>
           </SidebarHeader>
           <SidebarContent>{content}</SidebarContent>
-          <SignedIn>
+          {userId != null && (
             <SidebarFooter>
               <SidebarMenu>
                 <SidebarMenuItem>{footerButton}</SidebarMenuItem>
               </SidebarMenu>
             </SidebarFooter>
-          </SignedIn>
+          )}
         </Sidebar>
         <main className="flex-1">{children}</main>
       </AppSidebarClient>

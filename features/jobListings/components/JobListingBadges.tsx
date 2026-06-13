@@ -45,7 +45,6 @@ export function JobListingBadges({
 }) {
   const badgeProps = {
     variant: "outline",
-    className,
   } satisfies ComponentProps<typeof Badge>;
 
   return (
@@ -62,26 +61,26 @@ export function JobListingBadges({
         </Badge>
       )}
       {wage != null && wageInterval != null && (
-        <Badge {...badgeProps}>
+        <Badge {...badgeProps} className={className}>
           <BanknoteIcon />
           {formatWage(wage, wageInterval)}
         </Badge>
       )}
       {(stateAbbreviation != null || city != null) && (
-        <Badge {...badgeProps}>
+        <Badge {...badgeProps} className={className}>
           <MapPinIcon className="size-10" />
           {formatJobListingLocation({ stateAbbreviation, city })}
         </Badge>
       )}
-      <Badge {...badgeProps}>
+      <Badge {...badgeProps} className={className}>
         <BuildingIcon />
         {formatLocationRequirement(locationRequirement)}
       </Badge>
-      <Badge {...badgeProps}>
+      <Badge {...badgeProps} className={className}>
         <HourglassIcon />
         {formatJobType(type)}
       </Badge>
-      <Badge {...badgeProps}>
+      <Badge {...badgeProps} className={className}>
         <GraduationCapIcon />
         {formatExperienceLevel(experienceLevel)}
       </Badge>

@@ -46,6 +46,43 @@ import {
 } from "@/components/ui/dialog";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import { NewJobListingApplicationForm } from "@/features/jobListingApplications/components/NewJobListingApplicationForm";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ jobListingId: string }>;
+}): Promise<Metadata> {
+  const { jobListingId } = await params;
+  const jobListing = await getJobListingForMetadata(jobListingId);
+
+  if (jobListing == null) {
+    return { title: "Job Not Found" };
+  }
+
+  return {
+    title: jobListing.title,
+    description: `${jobListing.title} at ${jobListing.organization.name}`,
+  };
+}
+
+async function getJobListingForMetadata(id: string) {
+  "use cache";
+  cacheTag(getJobListingIdTag(id));
+
+  return db.query.JobListingTable.findFirst({
+    where: and(
+      eq(JobListingTable.id, id),
+      eq(JobListingTable.status, "published")
+    ),
+    columns: { title: true },
+    with: {
+      organization: {
+        columns: { name: true },
+      },
+    },
+  });
+}
 
 export default function JobListingPage({
   params,
@@ -56,8 +93,8 @@ export default function JobListingPage({
 }) {
   return (
     <>
-      <ResizablePanelGroup autoSaveId="job-board-panel" direction="horizontal">
-        <ResizablePanel id="left" order={1} defaultSize={60} minSize={30}>
+      <ResizablePanelGroup orientation="horizontal">
+        <ResizablePanel id="left" defaultSize={60} minSize={30}>
           <div className="p-4 h-screen overflow-y-auto">
             <JobListingItems searchParams={searchParams} params={params} />
           </div>
@@ -82,7 +119,7 @@ export default function JobListingPage({
           }
         >
           <ResizableHandle withHandle className="mx-2" />
-          <ResizablePanel id="right" order={2} defaultSize={40} minSize={30}>
+          <ResizablePanel id="right" defaultSize={40} minSize={30}>
             <div className="p-4 h-screen overflow-y-auto">
               <Suspense fallback={<LoadingSpinner />}>
                 <JobListingDetails

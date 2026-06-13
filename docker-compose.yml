@@ -10,5 +10,13 @@ services:
       - POSTGRES_DB=${DB_NAME}
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  inngest:
+    image: inngest/inngest
+    ports:
+      - "8288:8288"
+      - "8289:8289"
+    command: "inngest dev -u http://host.docker.internal:3000/api/inngest"
+
 volumes:
   pgdata:

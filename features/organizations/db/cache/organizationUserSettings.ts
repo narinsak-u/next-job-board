@@ -19,6 +19,6 @@ export function revalidateOrganizationUserSettingsCache(id: {
   organizationId: string;
   userId: string;
 }) {
-  revalidateTag(getOrganizationUserSettingsGlobalTag());
-  revalidateTag(getOrganizationUserSettingsIdTag(id));
+  revalidateTag(getOrganizationUserSettingsGlobalTag(), "max");
+  revalidateTag(getOrganizationUserSettingsIdTag(id), "max");
 }

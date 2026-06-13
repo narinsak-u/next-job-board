@@ -16,10 +16,16 @@ import {
   JobListingStatus,
   JobListingTable,
 } from "@/drizzle/schema";
-import {
-  ApplicationTable,
-  SkeletonApplicationTable,
-} from "@/features/jobListingApplications/components/ApplicationTable";
+import { SkeletonApplicationTable } from "@/features/jobListingApplications/components/ApplicationTable";
+import dynamic from "next/dynamic";
+
+const ApplicationTable = dynamic(
+  () =>
+    import(
+      "@/features/jobListingApplications/components/ApplicationTable"
+    ).then((m) => m.ApplicationTable),
+  { loading: () => <SkeletonApplicationTable /> }
+);
 import { getJobListingApplicationJobListingTag } from "@/features/jobListingApplications/db/cache/jobListingApplications";
 import {
   deleteJobListing,
@@ -38,7 +44,6 @@ import { getUserResumeIdTag } from "@/features/users/db/cache/userResumes";
 import { getUserIdTag } from "@/features/users/db/cache/users";
 import { getCurrentOrganization } from "@/services/clerk/lib/getCurrentAuth";
 import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermissions";
-// import { Action } from "@mdxeditor/editor";
 import { and, eq } from "drizzle-orm";
 import {
   EditIcon,
@@ -52,10 +57,29 @@ import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReactNode, Suspense } from "react";
+import type { Metadata } from "next";
 
 type Props = {
   params: Promise<{ jobListingId: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ jobListingId: string }>;
+}): Promise<Metadata> {
+  const { orgId } = await getCurrentOrganization();
+  const { jobListingId } = await params;
+
+  if (orgId == null) return { title: "Employer Dashboard" };
+
+  const jobListing = await getJobListing(jobListingId, orgId);
+  if (jobListing == null) return { title: "Job Listing Not Found" };
+
+  return {
+    title: `${jobListing.title} — Employer`,
+  };
+}
 
 export default function JobListingPage(props: Props) {
   return (
