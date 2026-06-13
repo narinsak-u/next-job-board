@@ -7,9 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { JobListingAiSearchForm } from "@/features/jobListings/components/JobListingAiSearchForm";
-import { SignUpButton } from "@/services/clerk/components/AuthButtons";
-import { getCurrentUser } from "@/services/clerk/lib/getCurrentAuth";
+import { getCurrentUser } from "@/services/better-auth/lib/getCurrentAuth";
+import Link from "next/link";
 
 export default function AiSearchPage() {
   return (
@@ -57,7 +58,9 @@ function NoPermission() {
       <p className="mb-4 text-muted-foreground">
         You need to create an account before using AI search
       </p>
-      <SignUpButton />
+      <Button asChild>
+        <Link href="/sign-up">Create Account</Link>
+      </Button>
     </CardContent>
   );
 }

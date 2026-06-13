@@ -27,13 +27,12 @@ import { convertSearchParamsToString } from "@/lib/convertSearchParamsToString";
 import { XIcon } from "lucide-react";
 import { JobListingBadges } from "@/features/jobListings/components/JobListingBadges";
 import { MarkdownRenderer } from "@/components/markdown/MarkdownRenderer";
-import { getCurrentUser } from "@/services/clerk/lib/getCurrentAuth";
+import { getCurrentUser } from "@/services/better-auth/lib/getCurrentAuth";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { SignUpButton } from "@/services/clerk/components/AuthButtons";
 import { getJobListingApplicationIdTag } from "@/features/jobListingApplications/db/cache/jobListingApplications";
 import { differenceInDays } from "date-fns";
 import { connection } from "next/server";
@@ -218,7 +217,7 @@ async function ApplyButton({ jobListingId }: { jobListingId: string }) {
         </PopoverTrigger>
         <PopoverContent className="flex flex-col gap-2">
           You need to create an account before applying for a job.
-          <SignUpButton />
+          <Link href="/sign-up" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">Create Account</Link>
         </PopoverContent>
       </Popover>
     );

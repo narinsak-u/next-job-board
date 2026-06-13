@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm"
 import { cacheTag } from "next/dist/server/use-cache/cache-tag"
 import { getPlanFeaturesIdTag, getPlanFeaturesGlobalTag } from "./cache/planFeatures"
 
-export function getPlanFeatures(organizationId: string) {
+export async function getPlanFeatures(organizationId: string) {
   "use cache"
   cacheTag(getPlanFeaturesGlobalTag(), getPlanFeaturesIdTag(organizationId))
 

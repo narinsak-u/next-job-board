@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Suspense } from "react";
 import { DropzoneClient } from "./_DropzoneClient";
-import { getCurrentUser } from "@/services/clerk/lib/getCurrentAuth";
+import { getCurrentUser } from "@/services/better-auth/lib/getCurrentAuth";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";

@@ -1,6 +1,6 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
-import { getCurrentUser } from "../clerk/lib/getCurrentAuth";
+import { getCurrentUser } from "../better-auth/lib/getCurrentAuth";
 import { inngest } from "../inngest/client";
 import { upsertUserResume } from "@/features/users/db/userResumes";
 import { db } from "@/drizzle/db";
