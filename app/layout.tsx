@@ -4,6 +4,7 @@ import "./globals.css";
 import "@mdxeditor/editor/style.css";
 import { ClerkProvider } from "@/services/clerk/components/ClerkProvider";
 import { Toaster } from "@/components/ui/sonner";
+import { Suspense } from "react";
 import { UploadThingSSR } from "@/services/uploadthing/components/UploadThingSSR";
 
 const geistSans = Geist({
@@ -38,7 +39,7 @@ export default function RootLayout({
         >
           {children}
           <Toaster richColors />
-          <UploadThingSSR />
+          <Suspense><UploadThingSSR /></Suspense>
         </body>
       </html>
     </ClerkProvider>
