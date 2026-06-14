@@ -12,26 +12,27 @@ import {
   JobListingTable,
   jobListingTypes,
   locationRequirements,
-  OrganizationTable,
 } from "@/drizzle/schema";
 import { convertSearchParamsToString } from "@/lib/convertSearchParamsToString";
 import { cn } from "@/lib/utils";
 
-import { and, desc, eq, ilike, or, SQL } from "drizzle-orm";
+import { and, count, desc, eq, ilike, or, SQL } from "drizzle-orm";
 import Link from "next/link";
 import { Suspense } from "react";
 import { differenceInDays } from "date-fns";
 import { connection } from "next/server";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { JobListingBadges } from "@/features/jobListings/components/JobListingBadges";
 import { z } from "zod";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 import { getJobListingGlobalTag } from "@/features/jobListings/db/cache/jobListings";
 import { getOrganizationIdTag } from "@/features/organizations/db/cache/organizations";
 
+const PAGE_SIZE = 10;
+
 type Props = {
   searchParams: Promise<Record<string, string | string[]>>;
-  params?: Promise<{ jobListingId: string }>;
 };
 
 const searchParamsSchema = z.object({
@@ -46,6 +47,7 @@ const searchParamsSchema = z.object({
     .transform((v) => (Array.isArray(v) ? v : [v]))
     .optional()
     .catch([]),
+  page: z.coerce.number().optional().catch(undefined),
 });
 
 export function JobListingItems(props: Props) {
@@ -56,28 +58,33 @@ export function JobListingItems(props: Props) {
   );
 }
 
-async function SuspendedComponent({ searchParams, params }: Props) {
-  const jobListingId = params ? (await params).jobListingId : undefined;
+async function SuspendedComponent({ searchParams }: Props) {
   const { success, data } = searchParamsSchema.safeParse(await searchParams);
   const search = success ? data : {};
+  const currentPage = search.page ?? 1;
 
-  const jobListings = await getJobListings(search, jobListingId);
+  const { listings, totalPages } = await getJobListings(search);
 
-  if (jobListings.length === 0) {
+  if (listings.length === 0) {
     return (
       <div className="text-muted-foreground p-4">No job listings found</div>
     );
   }
 
+  const linkParams = Object.fromEntries(
+    Object.entries(search).map(([key, value]) => [
+      key,
+      value !== undefined ? String(value) : "",
+    ]),
+  );
+
   return (
     <div className="space-y-4">
-      {jobListings.map((jobListing) => (
+      {listings.map((jobListing) => (
         <Link
           className="block"
           key={jobListing.id}
-          href={`/job-listings/${jobListing.id}?${convertSearchParamsToString(
-            search,
-          )}`}
+          href={`/?jobId=${jobListing.id}&${convertSearchParamsToString(linkParams)}`}
         >
           <JobListingListItem
             jobListing={jobListing}
@@ -85,6 +92,31 @@ async function SuspendedComponent({ searchParams, params }: Props) {
           />
         </Link>
       ))}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 pt-4">
+          {currentPage > 1 && (
+            <Button variant="outline" size="sm" asChild>
+              <Link
+                href={`/?${convertSearchParamsToString({ ...linkParams, page: String(currentPage - 1) })}`}
+              >
+                Previous
+              </Link>
+            </Button>
+          )}
+          <span className="text-sm text-muted-foreground">
+            Page {currentPage} of {totalPages}
+          </span>
+          {currentPage < totalPages && (
+            <Button variant="outline" size="sm" asChild>
+              <Link
+                href={`/?${convertSearchParamsToString({ ...linkParams, page: String(currentPage + 1) })}`}
+              >
+                Next
+              </Link>
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -182,10 +214,7 @@ async function DaysSincePosting({ postedAt }: { postedAt: Date }) {
 }
 
 // # Get job listings
-async function getJobListings(
-  searchParams: z.infer<typeof searchParamsSchema>,
-  jobListingId: string | undefined,
-) {
+async function getJobListings(searchParams: z.infer<typeof searchParamsSchema>) {
   "use cache";
   cacheTag(getJobListingGlobalTag());
 
@@ -229,16 +258,21 @@ async function getJobListings(
     );
   }
 
-  const data = await db.query.JobListingTable.findMany({
-    where: or(
-      jobListingId
-        ? and(
-            eq(JobListingTable.status, "published"),
-            eq(JobListingTable.id, jobListingId),
-          )
-        : undefined,
-      and(eq(JobListingTable.status, "published"), ...whereConditions),
-    ),
+  const page = searchParams.page ?? 1;
+  const offset = (page - 1) * PAGE_SIZE;
+
+  const where = and(eq(JobListingTable.status, "published"), ...whereConditions);
+
+  const [countResult] = await db
+    .select({ total: count() })
+    .from(JobListingTable)
+    .where(where);
+
+  const totalCount = countResult?.total ?? 0;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+  const listings = await db.query.JobListingTable.findMany({
+    where,
     with: {
       organization: {
         columns: {
@@ -249,11 +283,13 @@ async function getJobListings(
       },
     },
     orderBy: [desc(JobListingTable.isFeatured), desc(JobListingTable.postedAt)],
+    limit: PAGE_SIZE,
+    offset,
   });
 
-  data.forEach((listing) => {
+  listings.forEach((listing) => {
     cacheTag(getOrganizationIdTag(listing.organization.id));
   });
 
-  return data;
+  return { listings, totalPages };
 }
