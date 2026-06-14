@@ -1,6 +1,6 @@
 import { boolean, pgTable, varchar } from "drizzle-orm/pg-core";
 import { createdAt, updatedAt } from "../schemaHelpers";
-import { UserTable } from "./user";
+import { user } from "./auth";
 import { relations } from "drizzle-orm";
 
 export const UserNotificationSettingsTable = pgTable(
@@ -8,7 +8,7 @@ export const UserNotificationSettingsTable = pgTable(
   {
     userId: varchar()
       .primaryKey()
-      .references(() => UserTable.id),
+      .references(() => user.id),
     newJobEmailNotifications: boolean().notNull().default(false),
     aiPrompt: varchar(),
     createdAt,
@@ -19,9 +19,9 @@ export const UserNotificationSettingsTable = pgTable(
 export const userNotificationSettingsRelations = relations(
   UserNotificationSettingsTable,
   ({ one }) => ({
-    user: one(UserTable, {
+    user: one(user, {
       fields: [UserNotificationSettingsTable.userId],
-      references: [UserTable.id],
+      references: [user.id],
     }),
   })
 );

@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AvatarInfo } from "@/components/AvatarInfo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,8 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
-import { SignOutButton } from "@/services/clerk/components/AuthButtons";
-import { useClerk } from "@clerk/nextjs";
+import { authClient } from "@/services/better-auth/lib/client";
 import {
   ChevronsUpDown,
   LogOutIcon,
@@ -19,16 +18,22 @@ import {
   UserIcon,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type User = {
   name: string;
-  imageUrl: string;
+  image: string | null;
   email: string;
 };
 
 export function SidebarUserButtonClient({ user }: { user: User }) {
   const { isMobile, setOpenMobile } = useSidebar();
-  const { openUserProfile } = useClerk();
+  const router = useRouter();
+
+  async function handleSignOut() {
+    await authClient.signOut()
+    router.push("/")
+  }
 
   return (
     <DropdownMenu>
@@ -37,7 +42,7 @@ export function SidebarUserButtonClient({ user }: { user: User }) {
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <UserInfo {...user} />
+          <AvatarInfo imageUrl={user.image} name={user.name} subtitle={user.email} />
           <ChevronsUpDown className="ml-auto group-data-[state=collapsed]:hidden" />
         </SidebarMenuButton>
       </DropdownMenuTrigger>
@@ -48,16 +53,13 @@ export function SidebarUserButtonClient({ user }: { user: User }) {
         className="min-w-64 max-w-80"
       >
         <DropdownMenuLabel className="font-normal p-1">
-          <UserInfo {...user} />
+          <AvatarInfo imageUrl={user.image} name={user.name} subtitle={user.email} />
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => {
-            openUserProfile();
-            setOpenMobile(false);
-          }}
-        >
-          <UserIcon className="mr-1" /> Profile
+        <DropdownMenuItem asChild>
+          <Link href="/user-settings">
+            <UserIcon className="mr-1" /> Profile
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/user-settings/notifications">
@@ -65,35 +67,12 @@ export function SidebarUserButtonClient({ user }: { user: User }) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <SignOutButton>
-          <DropdownMenuItem>
-            <LogOutIcon className="mr-1" /> Log Out
-          </DropdownMenuItem>
-        </SignOutButton>
+        <DropdownMenuItem onClick={handleSignOut}>
+          <LogOutIcon className="mr-1" /> Log Out
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
 
-function UserInfo({ imageUrl, email, name }: User) {
-  const nameInitials = name
-    .split(" ") // Split by spaces
-    .slice(0, 2) // Take first 2 parts
-    .map((str) => str[0]) // Get first letter of each part
-    .join(""); // Join them together
 
-  return (
-    <div className="flex items-center gap-2 overflow-hidden">
-      <Avatar className="rounded-lg size-8">
-        <AvatarImage src={imageUrl} alt={name} />
-        <AvatarFallback className="uppercase bg-primary text-primary-foreground">
-          {nameInitials}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex flex-col flex-1 min-w-0 leading-tight group-data-[state=collapsed]:hidden">
-        <span className="truncate text-sm font-semibold">{name}</span>
-        <span className="truncate text-xs">{email}</span>
-      </div>
-    </div>
-  );
-}

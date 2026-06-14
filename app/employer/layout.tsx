@@ -19,7 +19,7 @@ import {
 import { getJobListingApplicationJobListingTag } from "@/features/jobListingApplications/db/cache/jobListingApplications";
 import { getJobListingOrganizationTag } from "@/features/jobListings/db/cache/jobListings";
 import { SidebarOrganizationButton } from "@/features/organizations/components/SidebarOrganizationButton";
-import { getCurrentOrganization } from "@/services/clerk/lib/getCurrentAuth";
+import { getCurrentOrganization } from "@/services/better-auth/lib/getCurrentAuth";
 import { count, desc, eq } from "drizzle-orm";
 import { ClipboardListIcon, PlusIcon } from "lucide-react";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
@@ -27,7 +27,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ReactNode, Suspense } from "react";
 import { JobListingMenuGroup } from "./_JobListingMenugroup";
-import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermissions";
+import { hasOrgUserPermission } from "@/services/better-auth/lib/orgUserPermissions";
 import { sortJobListingsByStatus } from "@/features/jobListings/lib/utils";
 
 export default function EmployerLayout({ children }: { children: ReactNode }) {
@@ -40,7 +40,7 @@ export default function EmployerLayout({ children }: { children: ReactNode }) {
 
 async function LayoutSuspense({ children }: { children: ReactNode }) {
   const { orgId } = await getCurrentOrganization();
-  if (orgId == null) return redirect("/organizations/select");
+  if (orgId == null) return redirect("/org-select");
 
   return (
     <AppSidebar
@@ -49,7 +49,7 @@ async function LayoutSuspense({ children }: { children: ReactNode }) {
           <SidebarGroup>
             <SidebarGroupLabel>Job Listings</SidebarGroupLabel>
             <AsyncIf
-              condition={() => hasOrgUserPermission("org:job_listings:create")}
+              condition={() => hasOrgUserPermission("job_listing:create")}
             >
               <SidebarGroupAction title="Add Job Listing" asChild>
                 <Link href="/employer/job-listings/new">
@@ -83,7 +83,7 @@ async function JobListingMenu({ orgId }: { orgId: string }) {
 
   if (
     jobListings.length === 0 &&
-    (await hasOrgUserPermission("org:job_listings:create"))
+    (await hasOrgUserPermission("job_listing:create"))
   ) {
     return (
       <SidebarMenu>

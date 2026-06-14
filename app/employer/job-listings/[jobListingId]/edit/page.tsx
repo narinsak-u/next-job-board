@@ -3,7 +3,7 @@ import { db } from "@/drizzle/db";
 import { JobListingTable } from "@/drizzle/schema";
 import { JobListingForm } from "@/features/jobListings/components/JobListingForm";
 import { getJobListingIdTag } from "@/features/jobListings/db/cache/jobListings";
-import { getCurrentOrganization } from "@/services/clerk/lib/getCurrentAuth";
+import { getCurrentOrganization } from "@/services/better-auth/lib/getCurrentAuth";
 import { and, eq } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 import { notFound } from "next/navigation";

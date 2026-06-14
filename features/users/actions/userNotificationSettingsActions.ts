@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { userNotificationSettingsSchema } from "./schemas";
-import { getCurrentUser } from "@/services/clerk/lib/getCurrentAuth";
+import { getCurrentUser } from "@/services/better-auth/lib/getCurrentAuth";
 import { updateUserNotificationSettings as updateUserNotificationSettingsDb } from "@/features/users/db/userNotificationSettings";
 
 // # Update User Notification Settings

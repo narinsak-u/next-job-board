@@ -42,8 +42,8 @@ import {
 import { getNextJobListingStatus } from "@/features/jobListings/lib/utils";
 import { getUserResumeIdTag } from "@/features/users/db/cache/userResumes";
 import { getUserIdTag } from "@/features/users/db/cache/users";
-import { getCurrentOrganization } from "@/services/clerk/lib/getCurrentAuth";
-import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermissions";
+import { getCurrentOrganization } from "@/services/better-auth/lib/getCurrentAuth";
+import { hasOrgUserPermission } from "@/services/better-auth/lib/orgUserPermissions";
 import { and, eq } from "drizzle-orm";
 import {
   EditIcon,
@@ -113,7 +113,7 @@ async function SuspendedPage({ params }: Props) {
 
         <div className="flex items-center gap-2 empty:-mt-4">
           <AsyncIf
-            condition={() => hasOrgUserPermission("org:job_listings:update")}
+            condition={() => hasOrgUserPermission("job_listing:update")}
           >
             <Button asChild variant="outline">
               <Link href={`/employer/job-listings/${jobListing.id}/edit`}>
@@ -130,7 +130,7 @@ async function SuspendedPage({ params }: Props) {
             />
           )}
           <AsyncIf
-            condition={() => hasOrgUserPermission("org:job_listings:delete")}
+            condition={() => hasOrgUserPermission("job_listing:delete")}
           >
             <ActionButton
               variant="destructive"
@@ -187,7 +187,7 @@ function StatusUpdateButton({
 
   return (
     <AsyncIf
-      condition={() => hasOrgUserPermission("org:job_listings:change_status")}
+      condition={() => hasOrgUserPermission("job_listing:change_status")}
     >
       {getNextJobListingStatus(status) === "published" ? (
         <AsyncIf
@@ -229,7 +229,7 @@ function FeaturedToggleButton({
 
   return (
     <AsyncIf
-      condition={() => hasOrgUserPermission("org:job_listings:change_status")}
+      condition={() => hasOrgUserPermission("job_listing:change_status")}
     >
       {isFeatured ? (
         button
@@ -338,10 +338,10 @@ async function Applications({ jobListingId }: { jobListingId: string }) {
         ) : null,
       }))}
       canUpdateRating={await hasOrgUserPermission(
-        "org:job_listings_applications:change_rating"
+        "application:change_rating"
       )}
       canUpdateStage={await hasOrgUserPermission(
-        "org:job_listings_applications:change_stage"
+        "application:change_stage"
       )}
     />
   );
@@ -365,7 +365,7 @@ async function getJobListingApplications(jobListingId: string) {
         columns: {
           id: true,
           name: true,
-          imageUrl: true,
+          image: true,
         },
         with: {
           resume: {

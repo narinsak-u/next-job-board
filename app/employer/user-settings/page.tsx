@@ -7,7 +7,7 @@ import { getOrganizationUserSettingsIdTag } from "@/features/organizations/db/ca
 import {
   getCurrentOrganization,
   getCurrentUser,
-} from "@/services/clerk/lib/getCurrentAuth";
+} from "@/services/better-auth/lib/getCurrentAuth";
 import { and, eq } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 import { notFound } from "next/navigation";

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "@mdxeditor/editor/style.css";
-import { ClerkProvider } from "@/services/clerk/components/ClerkProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { Suspense } from "react";
 import { UploadThingSSR } from "@/services/uploadthing/components/UploadThingSSR";
@@ -31,17 +30,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body
-          suppressHydrationWarning
-          className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
-        >
-          {children}
-          <Toaster richColors />
-          <Suspense><UploadThingSSR /></Suspense>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        suppressHydrationWarning
+        className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
+      >
+        {children}
+        <Toaster richColors />
+        <Suspense><UploadThingSSR /></Suspense>
+      </body>
+    </html>
   );
 }

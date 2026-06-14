@@ -6,8 +6,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { createdAt, updatedAt } from "../schemaHelpers";
-import { UserTable } from "./user";
-import { OrganizationTable } from "./organization";
+import { user, organization } from "./auth";
 import { relations } from "drizzle-orm";
 
 export const OrganizationUserSettingsTable = pgTable(
@@ -15,10 +14,10 @@ export const OrganizationUserSettingsTable = pgTable(
   {
     userId: varchar()
       .notNull()
-      .references(() => UserTable.id),
+      .references(() => user.id),
     organizationId: varchar()
       .notNull()
-      .references(() => OrganizationTable.id),
+      .references(() => organization.id),
     newApplicationEmailNotifications: boolean().notNull().default(false),
     minimumRating: integer(),
     createdAt,
@@ -30,13 +29,13 @@ export const OrganizationUserSettingsTable = pgTable(
 export const organizationUserSettingsRelations = relations(
   OrganizationUserSettingsTable,
   ({ one }) => ({
-    user: one(UserTable, {
+    user: one(user, {
       fields: [OrganizationUserSettingsTable.userId],
-      references: [UserTable.id],
+      references: [user.id],
     }),
-    organization: one(OrganizationTable, {
-      fields: [OrganizationUserSettingsTable.userId],
-      references: [OrganizationTable.id],
+    organization: one(organization, {
+      fields: [OrganizationUserSettingsTable.organizationId],
+      references: [organization.id],
     }),
   })
 );

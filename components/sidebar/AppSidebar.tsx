@@ -9,8 +9,9 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { AppSidebarClient } from "./_AppSidebarClient";
+import { auth } from "@/auth";
 import { ReactNode } from "react";
-import { auth } from "@clerk/nextjs/server";
+import { headers } from "next/headers";
 
 export async function AppSidebar({
   children,
@@ -21,7 +22,9 @@ export async function AppSidebar({
   content: ReactNode;
   footerButton: ReactNode;
 }) {
-  const { userId } = await auth();
+  const h = await headers();
+  const session = await auth.api.getSession({ headers: h });
+  const userId = session?.user.id ?? null;
 
   return (
     <SidebarProvider className="overflow-y-hidden">

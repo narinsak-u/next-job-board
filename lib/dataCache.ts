@@ -5,7 +5,8 @@ type CacheTag =
   | "userNotificationSettings"
   | "userResumes"
   | "jobListingApplications"
-  | "organizationUserSettings";
+  | "organizationUserSettings"
+  | "organizationPlanFeatures"
 
 export function getGlobalTag(tag: CacheTag) {
   return `global:${tag}` as const;

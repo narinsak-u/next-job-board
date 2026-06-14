@@ -1,24 +1,21 @@
-import { getCurrentOrganization } from "@/services/clerk/lib/getCurrentAuth";
+import { getCurrentOrganization } from "@/services/better-auth/lib/getCurrentAuth";
 import { getJobListingOrganizationTag } from "../db/cache/jobListings";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 import { db } from "@/drizzle/db";
 import { JobListingTable } from "@/drizzle/schema";
 import { and, count, eq } from "drizzle-orm";
-import { hasPlanFeature } from "@/services/clerk/lib/planFeatures";
+import { hasPlanFeature } from "@/services/better-auth/lib/planFeatures";
 
 export async function hasReachedMaxPublishedJobListings() {
   const { orgId } = await getCurrentOrganization();
   if (orgId == null) return true;
 
   const count = await getPublishedJobListingsCount(orgId);
+  const maxListings = await hasPlanFeature("max_published_job_listings");
 
-  const canPost = await Promise.all([
-    hasPlanFeature("post_1_job_listing").then((has) => has && count < 1),
-    hasPlanFeature("post_3_job_listings").then((has) => has && count < 3),
-    hasPlanFeature("post_15_job_listings").then((has) => has && count < 15),
-  ]);
+  if (maxListings === null) return false;
 
-  return !canPost.some(Boolean);
+  return count >= maxListings;
 }
 
 export async function hasReachedMaxFeaturedJobListings() {
@@ -26,13 +23,11 @@ export async function hasReachedMaxFeaturedJobListings() {
   if (orgId == null) return true;
 
   const count = await getFeaturedJobListingsCount(orgId);
+  const maxFeatured = await hasPlanFeature("max_featured_job_listings");
 
-  const canFeature = await Promise.all([
-    hasPlanFeature("1_featured_job_listing").then((has) => has && count < 1),
-    hasPlanFeature("unlimited_featured_jobs_listings"),
-  ]);
+  if (maxFeatured === null) return false;
 
-  return !canFeature.some(Boolean);
+  return count >= maxFeatured;
 }
 
 async function getPublishedJobListingsCount(orgId: string) {

@@ -43,4 +43,5 @@ next-env.d.ts
 
 # inngest
 .inngest
-.inngest/
+.inngest/nul
+nul

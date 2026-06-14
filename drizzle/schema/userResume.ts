@@ -1,12 +1,12 @@
 import { pgTable, varchar } from "drizzle-orm/pg-core";
 import { createdAt, updatedAt } from "../schemaHelpers";
-import { UserTable } from "./user";
+import { user } from "./auth";
 import { relations } from "drizzle-orm";
 
 export const UserResumeTable = pgTable("user_resumes", {
   userId: varchar()
     .primaryKey()
-    .references(() => UserTable.id),
+    .references(() => user.id),
   resumeFileUrl: varchar().notNull(),
   resumeFileKey: varchar().notNull(),
   aiSummary: varchar(),
@@ -15,8 +15,8 @@ export const UserResumeTable = pgTable("user_resumes", {
 });
 
 export const userResumeRelations = relations(UserResumeTable, ({ one }) => ({
-  user: one(UserTable, {
+  user: one(user, {
     fields: [UserResumeTable.userId],
-    references: [UserTable.id],
+    references: [user.id],
   }),
 }));

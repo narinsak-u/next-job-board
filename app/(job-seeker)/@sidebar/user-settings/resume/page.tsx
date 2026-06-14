@@ -1,4 +1,4 @@
-import { UserSettingsSidebar } from "@/app/(job-seeker)/_shared/UserSettingsSidebar";
+import { UserSettingsSidebar } from "@/features/users/components/UserSettingsSidebar";
 
 export default function UserResumeSidebar() {
   return <UserSettingsSidebar />;

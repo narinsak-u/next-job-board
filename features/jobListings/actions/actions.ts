@@ -5,7 +5,7 @@ import { jobListingAiSearchSchema, jobListingSchema } from "./schemas";
 import {
   getCurrentOrganization,
   getCurrentUser,
-} from "@/services/clerk/lib/getCurrentAuth";
+} from "@/services/better-auth/lib/getCurrentAuth";
 import { redirect } from "next/navigation";
 import {
   insertJobListing,
@@ -20,7 +20,7 @@ import {
   getJobListingIdTag,
 } from "../db/cache/jobListings";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
-import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermissions";
+import { hasOrgUserPermission } from "@/services/better-auth/lib/orgUserPermissions";
 import { getNextJobListingStatus } from "../lib/utils";
 import {
   hasReachedMaxFeaturedJobListings,
@@ -38,7 +38,7 @@ export async function createJobListing(
 ) {
   const { orgId } = await getCurrentOrganization();
 
-  const hasPermission = await hasOrgUserPermission("org:job_listings:create");
+  const hasPermission = await hasOrgUserPermission("job_listing:create");
 
   if (orgId == null || !hasPermission) {
     return {
@@ -76,7 +76,7 @@ export async function updateJobListing(
   const { orgId } = await getCurrentOrganization();
   if (
     orgId == null ||
-    !(await hasOrgUserPermission("org:job_listings:update"))
+    !(await hasOrgUserPermission("job_listing:update"))
   ) {
     return {
       error: true,
@@ -124,7 +124,7 @@ export async function toggleJobListingStatus(id: string) {
   const newStatus = getNextJobListingStatus(jobListing.status);
 
   if (
-    !(await hasOrgUserPermission("org:job_listings:change_status")) ||
+    !(await hasOrgUserPermission("job_listing:change_status")) ||
     (newStatus === "published" && (await hasReachedMaxPublishedJobListings()))
   ) {
     return error;
@@ -162,7 +162,7 @@ export async function toggleJobListingFeatured(id: string) {
   const newFeaturedStatus = !jobListing.isFeatured;
 
   if (
-    !(await hasOrgUserPermission("org:job_listings:change_status")) ||
+    !(await hasOrgUserPermission("job_listing:change_status")) ||
     (newFeaturedStatus && (await hasReachedMaxFeaturedJobListings()))
   ) {
     return error;
@@ -191,7 +191,7 @@ export async function deleteJobListing(id: string) {
   const jobListing = await getJobListing(id, orgId);
   if (jobListing == null) return error;
 
-  if (!(await hasOrgUserPermission("org:job_listings:delete"))) {
+  if (!(await hasOrgUserPermission("job_listing:delete"))) {
     return error;
   }
 

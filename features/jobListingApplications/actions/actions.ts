@@ -12,7 +12,7 @@ import { getUserResumeIdTag } from "@/features/users/db/cache/userResumes";
 import {
   getCurrentOrganization,
   getCurrentUser,
-} from "@/services/clerk/lib/getCurrentAuth";
+} from "@/services/better-auth/lib/getCurrentAuth";
 import { and, eq } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 import { z } from "zod";
@@ -22,7 +22,7 @@ import {
   updateJobListingApplication,
 } from "../db/jobListingsApplications";
 import { inngest } from "@/services/inngest/client";
-import { hasOrgUserPermission } from "@/services/clerk/lib/orgUserPermissions";
+import { hasOrgUserPermission } from "@/services/better-auth/lib/orgUserPermissions";
 
 // # Create Job Listing Application
 // 1. Check if user is signed in
@@ -105,7 +105,7 @@ export async function updateJobListingApplicationStage(
   }
 
   if (
-    !(await hasOrgUserPermission("org:job_listings_applications:change_stage"))
+    !(await hasOrgUserPermission("application:change_stage"))
   ) {
     return {
       error: true,
@@ -166,7 +166,7 @@ export async function updateJobListingApplicationRating(
   }
 
   if (
-    !(await hasOrgUserPermission("org:job_listings_applications:change_stage"))
+    !(await hasOrgUserPermission("application:change_stage"))
   ) {
     return {
       error: true,

@@ -5,7 +5,7 @@ import { organizationUserSettingsSchema } from "./schemas";
 import {
   getCurrentOrganization,
   getCurrentUser,
-} from "@/services/clerk/lib/getCurrentAuth";
+} from "@/services/better-auth/lib/getCurrentAuth";
 import { updateOrganizationUserSettings as updateOrganizationUserSettingsDb } from "@/features/organizations/db/organizationUserSettings";
 
 // # Update Organization User Settings

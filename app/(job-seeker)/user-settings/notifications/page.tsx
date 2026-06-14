@@ -4,7 +4,7 @@ import { db } from "@/drizzle/db";
 import { UserNotificationSettingsTable } from "@/drizzle/schema";
 import { NotificationsForm } from "@/features/users/components/NotificationsForm";
 import { getUserNotificationSettingsIdTag } from "@/features/users/db/cache/userNotificationSettings";
-import { getCurrentUser } from "@/services/clerk/lib/getCurrentAuth";
+import { getCurrentUser } from "@/services/better-auth/lib/getCurrentAuth";
 import { eq } from "drizzle-orm";
 import { cacheTag } from "next/dist/server/use-cache/cache-tag";
 import { notFound } from "next/navigation";
