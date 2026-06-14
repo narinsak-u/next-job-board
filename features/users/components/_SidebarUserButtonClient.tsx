@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AvatarInfo } from "@/components/AvatarInfo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,7 +42,7 @@ export function SidebarUserButtonClient({ user }: { user: User }) {
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <UserInfo {...user} />
+          <AvatarInfo imageUrl={user.image} name={user.name} subtitle={user.email} />
           <ChevronsUpDown className="ml-auto group-data-[state=collapsed]:hidden" />
         </SidebarMenuButton>
       </DropdownMenuTrigger>
@@ -53,7 +53,7 @@ export function SidebarUserButtonClient({ user }: { user: User }) {
         className="min-w-64 max-w-80"
       >
         <DropdownMenuLabel className="font-normal p-1">
-          <UserInfo {...user} />
+          <AvatarInfo imageUrl={user.image} name={user.name} subtitle={user.email} />
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
@@ -75,25 +75,4 @@ export function SidebarUserButtonClient({ user }: { user: User }) {
   );
 }
 
-function UserInfo({ image, email, name }: User) {
-  const nameInitials = name
-    .split(" ")
-    .slice(0, 2)
-    .map((str) => str[0])
-    .join("");
 
-  return (
-    <div className="flex items-center gap-2 overflow-hidden">
-      <Avatar className="rounded-lg size-8">
-        <AvatarImage src={image ?? undefined} alt={name} />
-        <AvatarFallback className="uppercase bg-primary text-primary-foreground">
-          {nameInitials}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex flex-col flex-1 min-w-0 leading-tight group-data-[state=collapsed]:hidden">
-        <span className="truncate text-sm font-semibold">{name}</span>
-        <span className="truncate text-xs">{email}</span>
-      </div>
-    </div>
-  );
-}

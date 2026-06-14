@@ -1,4 +1,4 @@
-import { JobBoardSidebar } from "../_shared/JobBoardSidebar";
+import { JobBoardSidebar } from "@/features/jobListings/components/JobBoardSidebar";
 
 export default function JobBoardSidebarPage() {
   return <JobBoardSidebar />;

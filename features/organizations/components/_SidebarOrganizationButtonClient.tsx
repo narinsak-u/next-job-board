@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AvatarInfo } from "@/components/AvatarInfo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,7 +53,7 @@ export function SidebarOrganizationButtonClient({
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <OrganizationInfo user={user} organization={organization} />
+          <AvatarInfo imageUrl={organization.logo} name={organization.name} subtitle={user.email} />
           <ChevronsUpDown className="ml-auto group-data-[state=collapsed]:hidden" />
         </SidebarMenuButton>
       </DropdownMenuTrigger>
@@ -64,7 +64,7 @@ export function SidebarOrganizationButtonClient({
         className="min-w-64 max-w-80"
       >
         <DropdownMenuLabel className="font-normal p-1">
-          <OrganizationInfo user={user} organization={organization} />
+          <AvatarInfo imageUrl={organization.logo} name={organization.name} subtitle={user.email} />
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
@@ -97,36 +97,4 @@ export function SidebarOrganizationButtonClient({
   );
 }
 
-function OrganizationInfo({
-  organization,
-  user,
-}: {
-  user: User;
-  organization: Organization;
-}) {
-  const nameInitials = organization.name
-    .split(" ")
-    .slice(0, 2)
-    .map((str) => str[0])
-    .join("");
 
-  return (
-    <div className="flex items-center gap-2 overflow-hidden">
-      <Avatar className="rounded-lg size-8">
-        <AvatarImage
-          src={organization.logo ?? undefined}
-          alt={organization.name}
-        />
-        <AvatarFallback className="uppercase bg-primary text-primary-foreground">
-          {nameInitials}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex flex-col flex-1 min-w-0 leading-tight group-data-[state=collapsed]:hidden">
-        <span className="truncate text-sm font-semibold">
-          {organization.name}
-        </span>
-        <span className="truncate text-xs">{user.email}</span>
-      </div>
-    </div>
-  );
-}

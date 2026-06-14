@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { JobListingDetails } from "../../_shared/JobListingDetails";
+import { JobListingDetails } from "@/features/jobListings/components/JobListingDetails";
 import { Button } from "@/components/ui/button";
 import { XIcon } from "lucide-react";
 import Link from "next/link";

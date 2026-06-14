@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { JobListingItems } from "./_shared/JobListingItems";
-import { JobListingDetails } from "./_shared/JobListingDetails";
-import { JobListingSheet } from "./_shared/JobListingSheet";
+import { JobListingItems } from "@/features/jobListings/components/JobListingItems";
+import { JobListingDetails } from "@/features/jobListings/components/JobListingDetails";
+import { JobListingSheet } from "@/features/jobListings/components/JobListingSheet";
 
 export default async function HomePage({
   searchParams,

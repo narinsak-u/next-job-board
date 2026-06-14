@@ -213,7 +213,6 @@ async function DaysSincePosting({ postedAt }: { postedAt: Date }) {
   }).format(daysSincePosted, "days");
 }
 
-// # Get job listings
 async function getJobListings(searchParams: z.infer<typeof searchParamsSchema>) {
   "use cache";
   cacheTag(getJobListingGlobalTag());
